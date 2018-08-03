@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"plugin"
 	. "../plugin_definitions"
+	"unsafe"
+	"reflect"
 )
 
 var plugins = map[string]PluginEntrypoint{}
@@ -37,12 +39,27 @@ func init() {
 
 }
 
+type Plug struct {
+	Path    string
+	_       chan struct{}
+	Symbols map[string]interface{}
+}
+
 func loadPlugin(file string) bool {
 	p, err := plugin.Open(file)
 	if err != nil {
 		log.Errorln("Could not load plugin " + file)
 		return false
 	}
+
+	pl := (*Plug)(unsafe.Pointer(p))
+
+	fmt.Printf("Plugin %s exported symbols (%d): \n", pl.Path, len(pl.Symbols))
+
+	for name, pointers := range pl.Symbols {
+		fmt.Printf("symbol: %s, pointer: %v, type: %v\n", name, pointers, reflect.TypeOf(pointers))
+	}
+	return false
 
 	peSym, err := p.Lookup("Entrypoint")
 	if err != nil {

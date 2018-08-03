@@ -1,3 +1,5 @@
+//go:generate go-bind-plugin -output-name DemoPlugin -plugin-package=../demo_plugin -rebuild -interface -output-package demoplugin -output-path demoplugin.so
+
 package main
 
 import (
